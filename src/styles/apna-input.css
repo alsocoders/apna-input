@@ -56,7 +56,16 @@
 .apna-input--with-label {
   display: flex;
   flex-direction: column;
-  gap: 0.375rem;
+  gap: 0;
+}
+
+.apna-input--with-label > .apna-input-label {
+  margin-bottom: 0.375rem;
+}
+
+.apna-input--with-label > .apna-input-field + .apna-input-error,
+.apna-input--with-label > [data-slot="apna-textarea"] + .apna-textarea-error {
+  margin-top: 0.25rem;
 }
 
 .apna-input-label {
@@ -337,9 +346,18 @@
   line-height: 1;
 }
 
+.apna-input-field--error,
+.apna-textarea--error {
+  border-color: var(--apna-input-destructive, #dc2626);
+}
+
+.apna-input-error,
+.apna-textarea-error,
 .apna-otp-error {
-  margin-top: 0.375rem;
+  margin: 0;
+  margin-top: 0.25rem;
   font-size: 0.75rem;
+  line-height: 1.25;
   color: var(--apna-input-destructive, #dc2626);
 }
 

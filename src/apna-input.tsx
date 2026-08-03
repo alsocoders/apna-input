@@ -31,6 +31,8 @@ export type ApnaInputProps = Omit<
   sanitize?: (value: string) => string
   label?: string
   invalidMessage?: string
+  error?: string | Error | null
+  errorText?: string
   value?: string
   defaultValue?: string
   onValueChange?: (value: string) => void
@@ -64,6 +66,8 @@ export function ApnaInput({
   sanitize,
   label,
   invalidMessage,
+  error,
+  errorText,
   value,
   defaultValue = "",
   onValueChange,
@@ -94,6 +98,14 @@ export function ApnaInput({
   const resolvedMinLength = minLength ?? preset?.minLength
   const resolvedPattern = pattern ?? preset?.pattern
   const fieldLabel = label ?? placeholder
+  const resolvedErrorMessage =
+    errorText ??
+    (error
+      ? typeof error === "string"
+        ? error
+        : error.message
+      : undefined)
+  const hasError = Boolean(resolvedErrorMessage)
   const resolvedPlaceholder =
     resolvedType === "date" ||
     resolvedType === "datetime-local" ||
@@ -229,7 +241,8 @@ export function ApnaInput({
       <div
         className={cn(
           mergedClassNames.field,
-          disabled && "apna-input-field--disabled"
+          disabled && "apna-input-field--disabled",
+          hasError && "apna-input-field--error"
         )}
         aria-disabled={disabled || undefined}
       >
@@ -255,6 +268,7 @@ export function ApnaInput({
           onChange={handleChange}
           onInvalid={handleInvalid}
           onPaste={handlePaste}
+          aria-invalid={hasError || undefined}
           className={mergedClassNames.input}
           {...props}
         />
@@ -275,6 +289,11 @@ export function ApnaInput({
           )
         ) : null}
       </div>
+      {hasError ? (
+        <p className="apna-input-error" role="alert">
+          {resolvedErrorMessage}
+        </p>
+      ) : null}
     </div>
   )
 }

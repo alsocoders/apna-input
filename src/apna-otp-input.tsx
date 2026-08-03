@@ -35,6 +35,10 @@ export type ApnaOtpInputProps = Omit<
   required?: boolean
   invalid?: boolean
   invalidMessage?: string
+  error?: string | Error | null
+  errorText?: string
+  name?: string
+  onBlur?: () => void
   separator?: React.ReactNode | boolean
   mask?: boolean
   onValueChange?: (value: string) => void
@@ -165,6 +169,10 @@ export function ApnaOtpInput({
   required,
   invalid,
   invalidMessage,
+  error,
+  errorText,
+  name,
+  onBlur,
   separator,
   mask = false,
   value,
@@ -197,9 +205,23 @@ export function ApnaOtpInput({
   }
 
   function handleInvalid() {
-    const message = invalidMessage ?? `Please enter the ${length}-digit code.`
+    const message =
+      invalidMessage ??
+      errorText ??
+      (error
+        ? typeof error === "string"
+          ? error
+          : error.message
+        : undefined) ??
+      `Please enter the ${length}-digit code.`
     onInvalid?.(message)
   }
+
+  const resolvedErrorMessage =
+    invalidMessage ??
+    errorText ??
+    (error ? (typeof error === "string" ? error : error.message) : undefined)
+  const showInvalid = Boolean(invalid || resolvedErrorMessage)
 
   const resolvedGroups = groups ?? [length]
   const showSeparator = separator !== false && resolvedGroups.length > 1
@@ -221,18 +243,19 @@ export function ApnaOtpInput({
       ) : null}
 
       <ApnaOtpMaskContext.Provider value={mask}>
-        <ApnaOtpInvalidContext.Provider value={Boolean(invalid)}>
+        <ApnaOtpInvalidContext.Provider value={showInvalid}>
           <OTPInput
           data-slot="apna-otp-input"
           maxLength={length}
           value={value}
           defaultValue={defaultValue}
           onChange={handleChange}
+          onBlur={onBlur}
           disabled={disabled}
           pattern={pattern}
           autoComplete={autoComplete}
           spellCheck={false}
-          aria-invalid={invalid || undefined}
+          aria-invalid={showInvalid || undefined}
           containerClassName={mergedClassNames.otpContainer}
           className="apna-otp-native"
           onComplete={onComplete}
@@ -254,10 +277,14 @@ export function ApnaOtpInput({
         </ApnaOtpInvalidContext.Provider>
       </ApnaOtpMaskContext.Provider>
 
-      {invalid && invalidMessage ? (
+      {showInvalid && resolvedErrorMessage ? (
         <p className="apna-otp-error" role="alert">
-          {invalidMessage}
+          {resolvedErrorMessage}
         </p>
+      ) : null}
+
+      {name ? (
+        <input type="hidden" name={name} value={value ?? ""} readOnly />
       ) : null}
 
       {required ? (
